@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Account</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style4.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+      
+
+        <ul class="nav-top">
+          <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span> Dashboard</span></a></li>
+          <li class="active"><a href="account.html"><i class="fas fa-user-circle"></i> <span> My Account</span></a></li>
+          <li><a href="shipment.html"><i class="fas fa-box-open"></i> <span> My Shipment</span></a></li>
+          <li><a href="new_shipment.html"><i class="fas fa-plus-square"></i><span> New Shipment</span></a></li>
+          <li><a href="device_data.html"><i class="fas fa-microchip"></i> <span> Device Data</span></a></li>
+        </ul>
+        <ul class="nav-bottom">
+          <li class="logout"><a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+        </ul>
+      </nav>
+
+    <div class="main-content">
+
+        <div class="main-header">
+            <h1>Your Information</h1>
+          </div>
+        
+          <section class="main-section">
+              <div class="user-info">
+                  <img src="/frontend/user.png" alt="user symbol">
+                  <p id="user-name"></p>
+                  <p id="user-email"></p>
+                  <p id="user-role"></p>
+              </div>
+          </section>
+  
+      </div>
+      
+  </div>
+
+
+  
+<script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const userName = getCookie("user_name");
+        const userEmail = getCookie("user_email");
+        const userRole = getCookie("user_role");
+  
+        document.getElementById("user-name").textContent = `Name: ${userName}`;
+        document.getElementById("user-email").textContent = `Email: ${userEmail}`;
+        document.getElementById("user-role").textContent = `Role: ${userRole}`;
+       });
+  
+      function getCookie(name) {
+        let cookieArr = document.cookie.split(";");
+        for(let i = 0; i < cookieArr.length; i++) {
+          let cookiePair = cookieArr[i].split("=");
+          if(name == cookiePair[0].trim()) {
+            return decodeURIComponent(cookiePair[1]);
+           }
+         }
+         return null;
+       }
+    
+    function logout() {
+        fetch('http://127.0.0.1:8000/auth/logout', {
+            method: 'GET',
+            credentials: 'same-origin'
+           }).then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+          }
+        });
+        }
+    
+      
+     </script>
+  
+</body>
+</html>

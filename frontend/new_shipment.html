@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Layout</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style3.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+        <ul class="nav-top">
+          <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+          <li><a href="account.html"><i class="fas fa-user-circle"></i> <span>My Account</span></a></li>
+          <li><a href="shipment.html"><i class="fas fa-box-open"></i> <span>My Shipment</span></a></li>
+          <li  class="active"><a href="new_shipment.html"><i class="fas fa-plus-square"></i> <span>New Shipment</span></a></li>
+          <li><a href="device_data.html"><i class="fas fa-microchip"></i> <span>Device Data</span></a></li>
+        </ul>
+        <ul class="nav-bottom">
+            <li class="logout"><a href="index.html"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+        </ul>
+      </nav>
+    <div class="main-content">
+
+        <div class="main-header">
+            <h1>New shipment</h1>
+            <p>Please fill in all details.</p>
+          </div>
+
+          <div class="form-container">
+            <form action="http://127.0.0.1:8000/shipment/create_shipment" method="post">
+              <div class="left">
+                  <label for="shipment-number">shipment Number</label>
+                  <input type="text" id="shipment-number" name="shipment_number" required > 
+                  <label for="route-details">route Details</label>
+                  <select name="route_details" id="route-details" required>
+                    <option value="" disabled selected>Select Route</option>
+                    <option value="1">Route 1</option>
+                    <option value="2">Route 2</option>
+                    <option value="3">Route 3</option>
+                    <option value="4">Route 4</option>
+                  </select>
+                  
+                  <label for="device_data">Device Data</label>
+                  <select name="device" id="device_data" required>
+                    <option value="" disabled selected>Select Device</option>
+                    <option value="1">Device 1</option>
+                    <option value="2">Device 2</option>
+                    <option value="3">Device 3</option>
+                    <option value="4">Device 4</option>
+                  </select>
+                  
+                  <label for="PO-number">PO Number</label>
+                  <input type="text" id="PO-number" name="po_number" required>
+
+                  <label for="NDC-number">NDC Number</label>
+                  <input type="text" id="NDC-number" name="ndc_number" required>
+
+                  <label for="serial_no_of_goods">Serial No of goods</label>
+                  <input type="text" id="serial_no_of_goods" name="serial_number_of_goods" required>
+                  
+          
+              </div>
+
+
+              <div class="right">
+                <label for="container-number" >Container Number</label>
+                <input type="text" id="container-number" name="container_number" required>
+                <label for="Goods-type">Goods Type</label>
+                <select name="goods_type" id="Goods-type" required> 
+                  <option value="" disabled selected>Select Goods Type</option>
+                  <option value="1">Type 1</option>
+                  <option value="2">Type 2</option>
+                  <option value="3">Type 3</option>
+                  <option value="4">Type 4</option>
+                </select>
+                
+                <label for="Expected-date">Expected Delivery Date</label>
+                <input type="date" id="Expected-date" name="expected_delivery_date" required>  
+                
+                <label for="Delivery-number">Delivery Number</label>
+                <input type="text" id="Delivery-number" name="delivery_number" required>
+
+                <label for="Batch-id">Batch ID</label>
+                <input type="text" id="Batch-id" name="batch_id" required> 
+
+                <label for="shipment-description">Shipment Description</label>
+                <input type="text" id="shipment-description" name="shipment_description" required>
+     
+              </div>
+              <input type="hidden" id="created_by" name="created_by">
+              <button type="submit">CREATE SHIPMENT</button>
+              <button type="reset">CLEAR DETAILS</button>
+            </form>  
+          </div>
+   
+      </div>
+      
+  </div>
+  
+<script>
+ // JavaScript to set the hidden field value from cookies
+    document.addEventListener('DOMContentLoaded', function() {
+    const email = getCookie('user_email'); // Function to get cookie value
+    document.getElementById('created_by').value = email;
+ 
+     });
+  
+   function getCookie(name) {
+      let cookieArr = document.cookie.split(";");
+      for(let i = 0; i < cookieArr.length; i++) {
+        let cookiePair = cookieArr[i].split("=");
+      if(name == cookiePair[0].trim()) {
+        return decodeURIComponent(cookiePair[1]);
+    }
+    }
+     return null;
+   }
+  </script>
+  
+</body>
+</html>

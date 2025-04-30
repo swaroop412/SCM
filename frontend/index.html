@@ -10,7 +10,7 @@
 <body>
     <div class="container" id="container">
     <div class="form-container sign-in-container">
-        <form action="#">
+        <form action="http://127.0.0.1:8000/auth/login" method="post" onsubmit="return validateRecaptcha()">
             <h1>Sign In</h1>
     
         <span>or use your account</span>
@@ -21,8 +21,9 @@
         <div class="g-recaptcha" data-sitekey="6LcukiIrAAAAALhQRLiTzQemejjguv-_4xtZPfZH"></div>
         <a href="#">Forgot Your Password</a>
         
-        
+       
         <button >Sign In</button>
+        
         
         </form>
 
@@ -43,7 +44,17 @@
     </div>
 </div>
 
-<script src="script.js"></script>
 
+<script>
+    function validateRecaptcha() {
+        var response = grecaptcha.getResponse();
+        if (response.length === 0) {
+            alert("Please complete the reCAPTCHA.");
+            return false;
+            }
+        return true;
+        }
+     </script>
+    
 </body>
 </html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shipment</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style5.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+      
+
+        <ul class="nav-top">
+          <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span> Dashboard</span></a></li>
+          <li><a href="account.html"><i class="fas fa-user-circle"></i> <span> My Account</span></a></li>
+          <li  class="active"><a href="shipment.html"><i class="fas fa-box-open"></i> <span> My Shipment</span></a></li>
+          <li><a href="new_shipment.html"><i class="fas fa-plus-square"></i> <span> New Shipment</span></a></li>
+          <li><a href="device_data.html"><i class="fas fa-microchip"></i> <span> Device Data</span></a></li>
+        </ul>
+        <ul class="nav-bottom">
+            <li class="logout"><a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+        </ul>
+      </nav>
+
+    <div class="main-content">
+
+        <div class="main-header">
+            <h1>shipment</h1>
+          </div>
+          <div class="shipment-container">
+              <div class="shipment-list" id="shipment-list"></div>
+              <div class="shipment-details" id="shipment-details"></div>
+          </div>
+      </div>
+      
+  </div>
+  <script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('http://127.0.0.1:8000/shipment/search_shipments', {
+        method: 'GET',
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        const shipmentList = document.getElementById('shipment-list');
+        const shipmentDetails = document.getElementById('shipment-details');
+        
+        data.shipments.forEach(shipment => {
+          const shipmentItem = document.createElement('div');
+          shipmentItem.className = 'shipment-item';
+          shipmentItem.innerText = `Shipment Number: ${shipment.shipment_number}`;
+          shipmentItem.addEventListener('click', () => {
+            // Remove highlight from all items
+            document.querySelectorAll('.shipment-item').forEach(item => item.classList.remove('active'));
+            // Highlight the selected item
+            shipmentItem.classList.add('active');
+            // Display shipment details
+            shipmentDetails.innerHTML = `
+              <p>Shipment Number: ${shipment.shipment_number}</p>
+              <p>Route Details: ${shipment.route_details}</p>
+              <p>Device: ${shipment.device}</p>
+              <p>PO Number: ${shipment.po_number}</p>
+              <p>NDC Number: ${shipment.ndc_number}</p>
+              <p>Serial No of Goods: ${shipment.serial_number_of_goods}</p>
+              <p>Container Number: ${shipment.container_number}</p>
+              <p>Goods Type: ${shipment.goods_type}</p>
+              <p>Expected Delivery Date: ${shipment.expected_delivery_date}</p>
+              <p>Delivery Number: ${shipment.delivery_number}</p>
+              <p>Batch ID: ${shipment.batch_id}</p>
+              <p>Shipment Description: ${shipment.shipment_description}</p>
+            `;
+          });
+          shipmentList.appendChild(shipmentItem);
+        });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+
+
+
+
+    function logout() {
+        fetch('http://127.0.0.1:8000/auth/logout', {
+            method: 'GET',
+            credentials: 'same-origin'
+           }).then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+          }
+        });
+        }
+    
+      </script>
+</body>
+</html>

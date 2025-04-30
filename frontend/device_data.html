@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Device Data</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style2.css">
+
+  
+    <script>
+      function checkAccess() {
+          var token = document.cookie.split('; ').find(row => row.startsWith('token=')).split('=')[1];
+          var payload = JSON.parse(atob(token.split('.')[1]));
+          var role = payload.role;
+          if (role !== 'admin') {
+            alert('Access denied. Admins only.');
+            window.location.href = '/frontend/dashboard.html';
+           }
+      }
+    
+      function checkTokenExpiry() {
+          var token = document.cookie.split('; ').find(row => row.startsWith('token=')).split('=')[1];
+          var payload = JSON.parse(atob(token.split('.')[1]));
+          var expiry = payload.exp;
+          var currentTime = Math.floor(Date.now() / 1000);
+    
+          if (currentTime >= expiry) {
+            alert('Session expired. Please log in again.');
+            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/frontend/index.html';
+          }
+      }
+    
+        window.onload = function() {
+        checkAccess();
+        setInterval(checkTokenExpiry, 60000); 
+        };
+    
+      function logout() {
+        fetch('http://127.0.0.1:8000/auth/logout', {
+            method: 'GET',
+            credentials: 'same-origin'
+           }).then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+          }
+        });
+      }
+    
+    </script>
+    
+
+
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+      
+
+        <ul class="nav-top">
+          <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span> Dashboard</span></a></li>
+          <li><a href="account.html"><i class="fas fa-user-circle"></i> <span> My Account</span></a></li>
+          <li><a href="shipment.html"><i class="fas fa-box-open"></i> <span> My Shipment</span></a></li>
+          <li><a href="new_shipment.html"><i class="fas fa-plus-square"></i> <span> New Shipment</span></a></li>
+          <li class="active"><a href="device_data.html"><i class="fas fa-microchip"></i> <span> Device Data</span></a></li>
+        </ul>
+        <ul class="nav-bottom">
+            <li class="logout"><a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+        </ul>
+      </nav>
+
+    <div class="main-content">
+
+        <div class="main-header">
+            <h1>Device data</h1>
+          </div>
+
+    </div>
+      
+  </div>
+</body>
+</html>

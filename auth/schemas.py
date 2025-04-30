@@ -4,7 +4,7 @@ from typing import List
 from datetime import date
 
 class User(BaseModel):
-    username: str
+    name: str
     email: EmailStr
     password: str
     role : str
@@ -13,20 +13,18 @@ class Login(BaseModel):
     email: EmailStr
     password: str
 
-
 class Shipment(BaseModel):
-    user_id: int
-    shipment_number: int
-    container_number: int
+    user_id: str
+    shipment_number: str
+    container_number: str
     route_details: str
     goods_type: str
     device: str
     expected_delivery_date: date
-    po_number: int
-    delivery_number: int
-    ndc_number: int
-    batch_id: int
-    serial_number_of_goods: int
+    po_number: str
+    delivery_number: str
+    ndc_number: str
+    batch_id: str
+    serial_number_of_goods: str
     shipment_description: str
-
-
+    created_by : str
