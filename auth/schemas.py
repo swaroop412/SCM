@@ -13,6 +13,8 @@ class Login(BaseModel):
     email: EmailStr
     password: str
 
+
+
 class Shipment(BaseModel):
     user_id: str
     shipment_number: str

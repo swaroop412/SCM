@@ -1,12 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends, Security , Form, Request
+from fastapi import APIRouter, HTTPException, Depends , Form, Request
 from auth.schemas import User, Login, Shipment
 from auth.models import hash_password, verify_password
 from auth.auth_handler import sign_jwt, decode_jwt
 from pymongo.database import Database
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from bson import ObjectId
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
-from datetime import date
+import requests,datetime,jwt
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 #yet to implement
@@ -24,17 +24,25 @@ def require_role(role: str):
         return user
     return role_dependency
 
+def verify_recaptcha(token:str)-> bool:
+    secret ="6LcukiIrAAAAACoahoaNGxPcY8_OFcWW2LIgEVic"
+    response = requests.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data={"secret":secret,'response':token}
+    )
+    return response.json().get('success',False)
+
 def auth_router(db: Database):
     router = APIRouter()
-
-    
+   
     @router.post("/signup")
     async def signup(name :str= Form(...) ,email: str = Form(...), password: str = Form(...)):
         db_user = db.users.find_one({"email":email})
         if db_user:
             return HTMLResponse(
                 "<h2>Email already registered. <a href='/frontend/index.html'>Please Login</a></h2>",
-                status_code=401
+                status_code=400
+                
             )
         
         role = "admin" if email.endswith("admin.com") else "user"
@@ -46,7 +54,7 @@ def auth_router(db: Database):
         db.users.insert_one(user_data)
         return HTMLResponse(
                 "<h2>User Created succesfully. <a href='/frontend/index.html'>Please Login</a></h2>",
-                status_code=401
+                status_code=201
             )
 
     @router.post("/api/signup")
@@ -72,10 +80,10 @@ def auth_router(db: Database):
         token = sign_jwt(email, db_user["role"],db_user["name"])
         response = RedirectResponse(url="/frontend/dashboard.html",status_code=302)
         
-        response.set_cookie(key="token",value=token) # type: ignore
-        response.set_cookie(key="user_name", value=db_user["name"]) # type: ignore
-        response.set_cookie(key="user_email", value=db_user["email"]) # type: ignore
-        response.set_cookie(key="user_role", value=db_user["role"]) # type: ignore
+        response.set_cookie(key="token",value=token['access_token'],httponly=True,samesite='Lax') # type: ignore
+        response.set_cookie(key="user_name", value=db_user["name"]) 
+        response.set_cookie(key="user_email", value=db_user["email"]) 
+        response.set_cookie(key="user_role", value=db_user["role"]) 
 
         return response
         '''
@@ -85,6 +93,7 @@ def auth_router(db: Database):
             return HTMLResponse("<script>alert('Wrong password');</script><h2>Invalid credentials. <a href='/frontend/index.html'>Try again</a></h2>",status_code=401)
         return RedirectResponse(url="/frontend/dashboard.html", status_code=302)
          '''
+    
 
     @router.post("/api/loginn")
     def api_login(user: Login):
@@ -116,10 +125,20 @@ def auth_router(db: Database):
 
     return router
 
-
-
 def shipment_router(db: Database) -> APIRouter:
     router = APIRouter()
+
+
+    @router.get("/all_ships")
+    async def get_all():
+        try:
+            shipments = list(db.shipments.find())
+            for shipment in shipments:
+                shipment["_id"] = str(shipment["_id"])
+
+            return JSONResponse(content={"shipments":shipments})
+        except Exception as e:
+            raise HTTPException(status_code=500,detail=str(e))
 
     @router.post("/create_shipment")
     def create_shipment(
@@ -200,6 +219,18 @@ def shipment_router(db: Database) -> APIRouter:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     
+    """
+    @router.get("/search_shipments")
+    async def search_shipments(current_user:dict = Depends(get_current_user)):
+        try:
+            shipments = list(db.shipments.find({"created_by":current_user["email"]}))
+            for shipment in shipments:
+                shipment["_id"] = str(shipment["_id"])
+                return JSONResponse(content={"shipments":shipments})
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    """
     @router.get('/search_shipments')
     async def search_shipments(request:Request):
         user_email = request.cookies.get('user_email')
@@ -212,4 +243,6 @@ def shipment_router(db: Database) -> APIRouter:
             return JSONResponse(content={"shipments":shipments})
         except Exception as e:
             raise HTTPException(status_code=500,detail=str(e))
+    
     return router
+    

@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from auth.routes import auth_router,shipment_router
 from pymongo import MongoClient
 from fastapi.staticfiles import StaticFiles
@@ -7,7 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app =FastAPI()
 
-app.mount("/frontend",StaticFiles(directory="frontend"),name="frontend")
+
+MONGODB_URI = "mongodb+srv://pswaroop412:manGO43@cluster0.dfdoi6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+client = MongoClient(MONGODB_URI)
+db = client["user_db"]
+shipment_db = client["shipment_db"]
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,13 +23,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/frontend",StaticFiles(directory="frontend"),name="frontend")
 
 
-MONGODB_URI = "mongodb+srv://pswaroop412:manGO43@cluster0.dfdoi6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-
-client = MongoClient(MONGODB_URI)
-db = client["user_db"]
-shipment_db = client["shipment_db"]
+@app.get("/")
+async def redirect_to_frontend():
+    return RedirectResponse(url="/frontend/index.html", status_code=302)
 
 
 app.include_router(auth_router(db),prefix="/auth")

@@ -80,10 +80,8 @@
   .main-content {
     flex-grow: 1;
     padding: 20px;
-    
     border-radius: 20px;
     background: url('map.jpg');
-    
     background-size:cover;
     filter: blur();
     justify-content: center;
@@ -98,7 +96,7 @@
     right: 0;
     bottom: 0;
     backdrop-filter: blur(5px); /* Adjust the blur value as needed */
-  z-index: -1; /* Ensure the overlay is behind the content */
+    z-index: -1; /* Ensure the overlay is behind the content */
 }
 
   
@@ -121,9 +119,19 @@
   }
   
   .shipment-container {
+   
+
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    padding: 30px 40px;
+    padding-top: 10px;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    overflow: hidden;
+  
     display: flex;
-    width: 80%;
-    justify-content: space-between;
+    justify-content: center; /* Center the buttons horizontally */
+    gap: 10px; /* Adjust the gap between buttons as needed */
   }
   
 
@@ -131,15 +139,15 @@
     width: 100%;
     margin-bottom: 20px;
     flex-direction: column;
-    margin-left: 20%;
-
   }
 
   .shipment-item{
     padding: 10px;
     border: 1px solid #ccc;
+    border-radius: 20px;
     margin-bottom: 5px;
     cursor: pointer;
+    padding-left: 20px;
   }
 
   .shipment-item:hover{
@@ -153,6 +161,5 @@
 
   .shipment-details{
     width: 100%;
-    padding-left: 20px;
     overflow-y: auto;
   }

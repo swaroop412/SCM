@@ -10,7 +10,6 @@
 <body>
   <div class="container">
     <nav class="sidebar">
-      
 
         <ul class="nav-top">
           <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span> Dashboard</span></a></li>
@@ -41,6 +40,9 @@
     document.addEventListener('DOMContentLoaded', function() {
       fetch('http://127.0.0.1:8000/shipment/search_shipments', {
         method: 'GET',
+        headers:{
+          'Authorization':`Bearer ${localStorage.getItem('access_token')}`
+        },
         credentials: 'same-origin'
       })
       .then(response => response.json())
@@ -51,26 +53,26 @@
         data.shipments.forEach(shipment => {
           const shipmentItem = document.createElement('div');
           shipmentItem.className = 'shipment-item';
-          shipmentItem.innerText = `Shipment Number: ${shipment.shipment_number}`;
+          shipmentItem.innerHTML = `<b>Shipment Number : </b> ${shipment.shipment_number}`;
           shipmentItem.addEventListener('click', () => {
             // Remove highlight from all items
             document.querySelectorAll('.shipment-item').forEach(item => item.classList.remove('active'));
             // Highlight the selected item
             shipmentItem.classList.add('active');
-            // Display shipment details
+            // Display shipment details   
             shipmentDetails.innerHTML = `
-              <p>Shipment Number: ${shipment.shipment_number}</p>
-              <p>Route Details: ${shipment.route_details}</p>
-              <p>Device: ${shipment.device}</p>
-              <p>PO Number: ${shipment.po_number}</p>
-              <p>NDC Number: ${shipment.ndc_number}</p>
-              <p>Serial No of Goods: ${shipment.serial_number_of_goods}</p>
-              <p>Container Number: ${shipment.container_number}</p>
-              <p>Goods Type: ${shipment.goods_type}</p>
-              <p>Expected Delivery Date: ${shipment.expected_delivery_date}</p>
-              <p>Delivery Number: ${shipment.delivery_number}</p>
-              <p>Batch ID: ${shipment.batch_id}</p>
-              <p>Shipment Description: ${shipment.shipment_description}</p>
+              <p><b>Shipment Number:</b> ${shipment.shipment_number}</p>
+              <p><b>Route Details:</b> ${shipment.route_details}</p>
+              <p><b>Device:</b> ${shipment.device}</p>
+              <p><b>PO Number:</b> ${shipment.po_number}</p>
+              <p><b>NDC Number:</b> ${shipment.ndc_number}</p>
+              <p><b>Serial No of Goods:</b> ${shipment.serial_number_of_goods}</p>
+              <p><b>Container Number:</b> ${shipment.container_number}</p>
+              <p><b>Goods Type:</b> ${shipment.goods_type}</p>
+              <p><b>Expected Delivery Date:</b> ${shipment.expected_delivery_date}</p>
+              <p><b>Delivery Number:</b> ${shipment.delivery_number}</p>
+              <p><b>Batch ID:</b> ${shipment.batch_id}</p>
+              <p><b>Shipment Description:</b> ${shipment.shipment_description}</p>
             `;
           });
           shipmentList.appendChild(shipmentItem);
@@ -80,9 +82,6 @@
         console.error('Error:', error);
       });
     });
-
-
-
 
     function logout() {
         fetch('http://127.0.0.1:8000/auth/logout', {
