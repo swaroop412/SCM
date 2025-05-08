@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
-from auth.routes import auth_router,shipment_router
+from auth.routes import auth_router,shipment_router, device_router
 from pymongo import MongoClient
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,5 +33,5 @@ async def redirect_to_frontend():
 
 app.include_router(auth_router(db),prefix="/auth")
 app.include_router(shipment_router(shipment_db), prefix="/shipment")
-
+app.include_router(device_router(db))
 

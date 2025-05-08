@@ -3,11 +3,17 @@ import json
 import time
 import random
 
-producer = KafkaProducer(
-    bootstrap_servers='localhost:9092',
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
-)
 
+while True:
+    try:
+        producer = KafkaProducer(
+            bootstrap_servers='kafka:9092',
+            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+        )
+        break
+    except Exception as e:
+        print(f"Kafka not ready, retrying in 5 seconds: {e}")
+        time.sleep(5)
 route = ['Newyork,USA', 'Chennai, India', 'Bengaluru, India', 'London,UK']
 
 while True:

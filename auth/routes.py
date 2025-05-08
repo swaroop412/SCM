@@ -6,7 +6,7 @@ from pymongo.database import Database
 from fastapi.security import OAuth2PasswordBearer
 from bson import ObjectId
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
-import requests,datetime,jwt
+import requests
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 #yet to implement
@@ -245,4 +245,24 @@ def shipment_router(db: Database) -> APIRouter:
             raise HTTPException(status_code=500,detail=str(e))
     
     return router
-    
+
+def device_router(db):
+    router = APIRouter()
+
+    @router.get("/api/device_data")
+    async def get_device_data(limit: int = 20):
+        try:
+
+            data = list(
+                db.sensor_readings.find()
+            )
+            
+            for item in data:
+                item["_id"] = str(item["_id"])
+                if "timestamp" in item:
+                    item["timestamp"] = str(item["timestamp"])
+            return JSONResponse(content={"device_data": data})
+        except Exception as e:
+            return JSONResponse(content={"error": str(e)}, status_code=500)
+
+    return router

@@ -4,9 +4,11 @@ import json,datetime
 
 consumer = KafkaConsumer(
     'sensor_data',
-    bootstrap_servers='localhost:9092',
+    bootstrap_servers='kafka:9092',
+    auto_offset_reset='earliest',
     value_deserializer=lambda m: json.loads(m.decode('utf-8'))
 )
+
 
 MONGODB_URI = "mongodb+srv://pswaroop412:manGO43@cluster0.dfdoi6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
