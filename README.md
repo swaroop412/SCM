@@ -44,7 +44,7 @@ This project is a **Shipment Management System** built with **FastAPI** for the 
 
 Clone this repository to your local machine:
 
-git clone https://github.com/your-username/scm-project.git
+git clone https://github.com/pswaroop412/scm-project.git
 cd scm-project
 
 text
