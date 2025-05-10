@@ -16,7 +16,6 @@ This project is a **Shipment Management System** built with **FastAPI** for the 
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
 - [Development Notes](#development-notes)
-- [License](#license)
 
 ## Features
 - **User Authentication**: User signup and login with JWT-based authentication.
@@ -141,9 +140,6 @@ Frontend files are served from the `/frontend` directory.
 - **JWT Authentication:** User authentication is managed via JWT tokens stored in HTTP-only cookies.
 - **Role-Based Access:** Admin and user roles control access to certain routes.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.s and devices, and also includes role-based authorization.
 
 ## Table of Contents
 - [Features](#features)
@@ -155,7 +151,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
   - [Running the Project](#running-the-project)
   - [Testing](#testing)
 - [Usage](#usage)
-- [License](#license)
 
 ## Features
 - **User Authentication**: User signup and login with JWT-based authentication.
