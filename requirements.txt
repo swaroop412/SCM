@@ -11,3 +11,4 @@ pydantic
 python-multipart
 python-jose
 python-jose[cryptography]
+python-dotenv

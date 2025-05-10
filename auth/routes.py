@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Depends , Form, Request
 from auth.schemas import User, Login, Shipment
 from auth.models import hash_password, verify_password
@@ -25,7 +27,7 @@ def require_role(role: str):
     return role_dependency
 
 def verify_recaptcha(token:str)-> bool:
-    secret ="6LcukiIrAAAAACoahoaNGxPcY8_OFcWW2LIgEVic"
+    secret =os.getenv("RECAPTCHA_SECRET")
     response = requests.post(
         "https://www.google.com/recaptcha/api/siteverify",
         data={"secret":secret,'response':token}
@@ -80,7 +82,8 @@ def auth_router(db: Database):
         token = sign_jwt(email, db_user["role"],db_user["name"])
         response = RedirectResponse(url="/frontend/dashboard.html",status_code=302)
         
-        response.set_cookie(key="token",value=token['access_token'],httponly=True,samesite='Lax') # type: ignore
+        response.set_cookie(key="token", value=token['access_token'], httponly=False, samesite='lax', path='/') 
+
         response.set_cookie(key="user_name", value=db_user["name"]) 
         response.set_cookie(key="user_email", value=db_user["email"]) 
         response.set_cookie(key="user_role", value=db_user["role"]) 
@@ -246,22 +249,32 @@ def shipment_router(db: Database) -> APIRouter:
     
     return router
 
-def device_router(db):
+def device_router(db: Database):
     router = APIRouter()
 
-    @router.get("/api/device_data")
+    @router.get("/device_data")
     async def get_device_data(limit: int = 20):
         try:
+            limit = max(1, min(limit, 100))
+            data = list(db["sensor_readings"].find().sort("timestamp", -1).limit(limit))
 
-            data = list(
-                db.sensor_readings.find()
-            )
-            
+            if not data:
+                return JSONResponse(content={"device_data": []}, status_code=200)
+
+            # Convert ObjectId to string and rename fields
             for item in data:
                 item["_id"] = str(item["_id"])
-                if "timestamp" in item:
-                    item["timestamp"] = str(item["timestamp"])
-            return JSONResponse(content={"device_data": data})
+                # Rename and map fields for frontend compatibility
+                item["sensor_id"] = item.pop("Device_ID", None)
+                item["Battery_Level"] = item.get("Battery_Level", None)
+                item["First_Sensor_temperature"] = item.get("First_Sensor_temperature", None)
+                item["Route_From"] = item.get("Route_From", None)
+                item["Route_To"] = item.get("Route_To", None)
+                item["timestamp"] = item.get("timestamp", None)
+                # Remove any fields not needed by frontend
+                # Optionally, you can format the timestamp to ISO string if needed
+
+            return JSONResponse(content={"device_data": data}, status_code=200)
         except Exception as e:
             return JSONResponse(content={"error": str(e)}, status_code=500)
 
