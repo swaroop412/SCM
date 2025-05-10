@@ -47,7 +47,7 @@ Clone this repository to your local machine:
 git clone https://github.com/pswaroop412/scm-project.git
 cd scm-project
 
-text
+
 
 Create and activate a virtual environment:
 
@@ -55,13 +55,13 @@ Create and activate a virtual environment:
 python -m venv venv
 .\venv\Scripts\activate
 
-text
+
 
 **Mac/Linux:**
 python3 -m venv venv
 source venv/bin/activate
 
-text
+
 
 ### Environment Variables
 
@@ -73,7 +73,7 @@ MONGODB_URI=mongodb+srv://<your-username>:<your-password>@cluster0.mongodb.net/<
 JWT Secret Key (Replace with your own secret key)
 JWT_SECRET_KEY=your_jwt_secret_key
 
-text
+
 
 > **Note:** Replace the placeholders with your actual MongoDB URI and JWT secret key.
 
@@ -81,7 +81,7 @@ text
 
 pip install -r requirements.txt
 
-text
+
 
 ### Running the Project
 
@@ -89,7 +89,7 @@ Start the backend server:
 
 uvicorn main:app --reload
 
-text
+
 
 The server will start at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
