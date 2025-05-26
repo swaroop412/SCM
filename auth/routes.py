@@ -238,35 +238,74 @@ def shipment_router():
         shipment_number: str = Form(...),
         route_details: str = Form(...),
         device: str = Form(...),
-        po_number: str = Form(...),
-        ndc_number: str = Form(...),
-        serial_number: str = Form(...),
-        container_number: str = Form(...),
+        po_number: str = Form(None),
+        ndc_number: str = Form(None),
+        serial_number: str = Form(None),
+        container_number: str = Form(None),
         goods_type: str = Form(...),
         delivery_date: str = Form(...),
-        delivery_number: str = Form(...),
+        delivery_number: str = Form(None),
         batch_id: str = Form(...),
-        description: str = Form(...)
+        description: str = Form(None)
     ):
+      
+        if not shipment_number.strip():
+            raise HTTPException(status_code=400, detail="Shipment number is required")
+        if not route_details.strip():
+            raise HTTPException(status_code=400, detail="Route details are required")
+        if not device.strip():
+            raise HTTPException(status_code=400, detail="Device is required")
+        if not goods_type.strip():
+            raise HTTPException(status_code=400, detail="Goods type is required")
+        if not batch_id.strip():
+            raise HTTPException(status_code=400, detail="Batch ID is required")
+
+       
+        if len(shipment_number) > 50:
+            raise HTTPException(status_code=400, detail="Shipment number too long (max 50 chars)")
+        if len(route_details) > 200:
+            raise HTTPException(status_code=400, detail="Route details too long (max 200 chars)")
+        if description and len(description) > 500:
+            raise HTTPException(status_code=400, detail="Description too long (max 500 chars)")
+
+        alphanumeric_fields = {
+            "shipment_number": shipment_number,
+            "po_number": po_number,
+            "ndc_number": ndc_number,
+            "serial_number": serial_number,
+            "container_number": container_number,
+            "delivery_number": delivery_number,
+            "batch_id": batch_id
+        }
+
+        for field_name, value in alphanumeric_fields.items():
+            if value and not value.replace('-', '').replace('_', '').isalnum():
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{field_name.replace('_', ' ').title()} can only contain letters, numbers, hyphens and underscores"
+                )
+
         shipment_data = {
-                "shipment_number": shipment_number,
-                "route_details": route_details,
-                "device": device,
-                "po_number": po_number,
-                "ndc_number": ndc_number,
-                "serial_number": serial_number,
-                "container_number": container_number,
-                "goods_type": goods_type,
-                "delivery_date": delivery_date,
-                "delivery_number": delivery_number,
-                "batch_id": batch_id,
-                "description": description,
-                "created_by": current_user["email"],
-                "created_at": datetime.utcnow(),
-                "status": "pending"
-            }
+            "shipment_number": shipment_number,
+            "route_details": route_details,
+            "device": device,
+            "po_number": po_number,
+            "ndc_number": ndc_number,
+            "serial_number": serial_number,
+            "container_number": container_number,
+            "goods_type": goods_type,
+            "delivery_date": delivery_date,
+            "delivery_number": delivery_number,
+            "batch_id": batch_id,
+            "description": description,
+            "created_by": current_user["email"],
+            "created_at": datetime.utcnow(),
+            "status": "pending"
+        }
+
         db[SHIPMENTS_COLLECTION].insert_one(shipment_data)
         return {"message": "Shipment created successfully"}
+    
 
     from datetime import datetime
 
