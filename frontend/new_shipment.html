@@ -147,7 +147,7 @@
       const formData = new FormData(form);
       const token = localStorage.getItem("access_token");
 
-      const res = await fetch("http://127.0.0.1/shipment/create_shipment", {
+      const res = await fetch("http://51.21.139.239:8000/shipment/create_shipment", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`

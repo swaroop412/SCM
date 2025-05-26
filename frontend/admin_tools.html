@@ -141,7 +141,7 @@
  
 
     async function fetchUsers(email = '') {
-      let url = 'http://127.0.0.1:8000/admin/users';
+      let url = 'http://51.21.139.239:8000/admin/users';
       const params = new URLSearchParams();
       if (email) {
         params.append('email', email);
@@ -227,7 +227,7 @@
       if (!confirm(`Change role of ${email} to ${newRole}?`)) return;
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000/admin/users/${encodeURIComponent(email)}/role`, {
+        const res = await fetch(`http://51.21.139.239:8000/admin/users/${encodeURIComponent(email)}/role`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -253,7 +253,7 @@
       if (!confirm(`Are you sure you want to delete user ${email}? This action cannot be undone.`)) return;
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000/admin/users/${encodeURIComponent(email)}`, {
+        const res = await fetch(`http://51.21.139.239:8000/admin/users/${encodeURIComponent(email)}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${getToken()}`
