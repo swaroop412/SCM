@@ -52,7 +52,7 @@
             event.preventDefault();
             const form = event.target;
 
-            // Get form data
+           
             const email = form.email.value;
             const password = form.password.value;
             const recaptcha = grecaptcha.getResponse();
@@ -64,7 +64,7 @@
                         "Content-Type": "application/x-www-form-urlencoded",
                     },
                     body: new URLSearchParams({
-                        username: email,  // Note: FastAPI OAuth2 expects 'username' not 'email'
+                        username: email,  
                         password: password,
                         recaptcha_token: recaptcha
                     })
@@ -77,7 +77,7 @@
 
                 const data = await res.json();
                 
-                // Store tokens and user data
+                
                 localStorage.setItem("access_token", data.access_token);
                 localStorage.setItem("user_name", data.user.name);
                 localStorage.setItem("user_email", data.user.email);
