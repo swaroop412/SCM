@@ -17,6 +17,8 @@
           <li  class="active"><a href="shipment.html"><i class="fas fa-box-open"></i> <span> My Shipment</span></a></li>
           <li><a href="new_shipment.html"><i class="fas fa-plus-square"></i> <span> New Shipment</span></a></li>
           <li><a href="device_data.html"><i class="fas fa-microchip"></i> <span> Device Data</span></a></li>
+          <li id="admin-tools-item" style="display: none;"><a href="admin_tools.html"><i class="fas fa-tools"></i> <span> Admin Tools</span></a></li>
+
         </ul>
         <ul class="nav-bottom">
             <li class="logout"><a href="index.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
@@ -35,65 +37,70 @@
       </div>
       
   </div>
-  <script>
-    
-    document.addEventListener('DOMContentLoaded', function() {
-      fetch('http://127.0.0.1:8000/shipment/search_shipments', {
-        method: 'GET',
-        headers:{
-          'Authorization':`Bearer ${localStorage.getItem('access_token')}`
-        },
-        credentials: 'same-origin'
-      })
-      .then(response => response.json())
-      .then(data => {
-        const shipmentList = document.getElementById('shipment-list');
-        const shipmentDetails = document.getElementById('shipment-details');
-        
-        data.shipments.forEach(shipment => {
-          const shipmentItem = document.createElement('div');
-          shipmentItem.className = 'shipment-item';
-          shipmentItem.innerHTML = `<b>Shipment Number : </b> ${shipment.shipment_number}`;
-          shipmentItem.addEventListener('click', () => {
-            // Remove highlight from all items
-            document.querySelectorAll('.shipment-item').forEach(item => item.classList.remove('active'));
-            // Highlight the selected item
-            shipmentItem.classList.add('active');
-            // Display shipment details   
-            shipmentDetails.innerHTML = `
-              <p><b>Shipment Number:</b> ${shipment.shipment_number}</p>
-              <p><b>Route Details:</b> ${shipment.route_details}</p>
-              <p><b>Device:</b> ${shipment.device}</p>
-              <p><b>PO Number:</b> ${shipment.po_number}</p>
-              <p><b>NDC Number:</b> ${shipment.ndc_number}</p>
-              <p><b>Serial No of Goods:</b> ${shipment.serial_number_of_goods}</p>
-              <p><b>Container Number:</b> ${shipment.container_number}</p>
-              <p><b>Goods Type:</b> ${shipment.goods_type}</p>
-              <p><b>Expected Delivery Date:</b> ${shipment.expected_delivery_date}</p>
-              <p><b>Delivery Number:</b> ${shipment.delivery_number}</p>
-              <p><b>Batch ID:</b> ${shipment.batch_id}</p>
-              <p><b>Shipment Description:</b> ${shipment.shipment_description}</p>
-            `;
-          });
-          shipmentList.appendChild(shipmentItem);
-        });
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    });
 
-    function logout() {
-        fetch('http://127.0.0.1:8000/auth/logout', {
-            method: 'GET',
-            credentials: 'same-origin'
-           }).then(response => {
-            if (response.redirected) {
-              window.location.href = response.url;
+      <script type="module">
+        import { apiClient } from '/frontend/js/api-client.js';
+        import { ErrorHandler } from '/frontend/js/error-handler.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+          try {
+            const { shipments } = await apiClient.getShipments();
+            renderShipments(shipments);
+          } catch (error) {
+            ErrorHandler.showError(error.message);
+            console.error('Shipment loading error:', error);
           }
         });
+
+        function renderShipments(shipments) {
+          const container = document.getElementById('shipment-list');
+          container.innerHTML = shipments.map(shipment => `
+            <div class="shipment-card">
+              <h3>${shipment.shipment_number}</h3>
+              <p>Route: ${shipment.route_details}</p>
+              <p>Status: ${shipment.status}</p>
+              <button class="view-details" data-id="${shipment._id}">
+                View Details
+              </button>
+            </div>
+          `).join('');
+
+          // Add event listeners
+          document.querySelectorAll('.view-details').forEach(button => {
+            button.addEventListener('click', showShipmentDetails);
+          });
         }
-    
+
+          async function logout() {
+          try {
+            // Clear client-side storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Call backend logout
+            await fetch('/auth/logout', {
+              method: 'GET',
+              credentials: 'include' // Important for cookie clearing
+            });
+            
+            // Redirect to login page
+            window.location.href = '/frontend/index.html';
+          } catch (error) {
+            console.error('Logout failed:', error);
+            window.location.href = '/frontend/index.html';
+          }
+        }
+ 
+
+        async function showShipmentDetails(event) {
+          const shipmentId = event.target.dataset.id;
+          try {
+            const shipment = await apiClient.request(`/shipment/${shipmentId}`);
+            // Show details modal...
+          } catch (error) {
+            ErrorHandler.showError('Failed to load shipment details');
+          }
+        }
       </script>
 </body>
 </html>

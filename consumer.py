@@ -4,20 +4,37 @@ import json
 import time
 import datetime
 import sys
+import os
+from dotenv import load_dotenv
 
-KAFKA_TOPIC = 'sensor_data'
-KAFKA_BROKER = 'kafka:9092'
-MONGO_URI = "mongodb+srv://pswaroop412:manGO43@cluster0.dfdoi6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+# Load environment variables from .env and kafka.env files
+load_dotenv()
+load_dotenv('kafka.env')
+
+# Kafka settings
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
+KAFKA_CONSUMER_GROUP_ID = os.getenv("KAFKA_CONSUMER_GROUP_ID")
+
+# MongoDB settings
+MONGODB_URI = os.getenv("MONGODB_URI")
+DB_NAME = os.getenv("DB_NAME", "iot_data")  # default database name
+SENSOR_READINGS_COLLECTION = os.getenv("SENSOR_READINGS_COLLECTION", "sensor_readings")  # default collection name
+
+# Check if required environment variables are set
+if not all([KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, KAFKA_CONSUMER_GROUP_ID, MONGODB_URI]):
+    print("[✗] Required environment variables are not set. Exiting.")
+    sys.exit(1)
 
 # Retry Kafka connection
 for attempt in range(10):
     try:
         consumer = KafkaConsumer(
             KAFKA_TOPIC,
-            bootstrap_servers=KAFKA_BROKER,
+            bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
             auto_offset_reset='earliest',
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-            group_id='sensor-consumer-group'
+            group_id=KAFKA_CONSUMER_GROUP_ID
         )
         print("[✓] Connected to Kafka.")
         break
@@ -28,11 +45,10 @@ else:
     print("[✗] Kafka is not available after multiple attempts. Exiting.")
     sys.exit(1)
 
-# Connect to MongoDB
 try:
-    client = MongoClient(MONGO_URI)
-    db = client.iot_data
-    collection = db.sensor_readings
+    client = MongoClient(MONGODB_URI)
+    db = client[DB_NAME]
+    collection = db[SENSOR_READINGS_COLLECTION]
     print("[✓] Connected to MongoDB.")
 except errors.ConnectionFailure as e:
     print(f"[✗] MongoDB connection error: {e}")

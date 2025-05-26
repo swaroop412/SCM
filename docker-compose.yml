@@ -9,6 +9,8 @@ services:
       - "8000:8000"
     depends_on:
       - kafka
+    env_file:
+      - .env
 
   producer:
     build:
@@ -17,6 +19,9 @@ services:
     container_name: producer-1
     depends_on:
       - kafka
+    env_file:
+      - kafka.env
+      - .env
 
   consumer:
     build:
@@ -25,6 +30,9 @@ services:
     container_name: consumer-1
     depends_on:
       - kafka
+    env_file:
+      - kafka.env
+      - .env
 
   kafka:
     image: bitnami/kafka:latest
@@ -39,7 +47,6 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-
     ports:
       - "9092:9092"
     volumes:

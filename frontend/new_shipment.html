@@ -16,9 +16,11 @@
           <li><a href="shipment.html"><i class="fas fa-box-open"></i> <span>My Shipment</span></a></li>
           <li  class="active"><a href="new_shipment.html"><i class="fas fa-plus-square"></i> <span>New Shipment</span></a></li>
           <li><a href="device_data.html"><i class="fas fa-microchip"></i> <span>Device Data</span></a></li>
+          <li id="admin-tools-item" style="display: none;"><a href="admin_tools.html"><i class="fas fa-tools"></i> <span> Admin Tools</span></a></li>
+
         </ul>
         <ul class="nav-bottom">
-            <li class="logout"><a href="index.html"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            <li class="logout"><a href="index.html" onclick="logout(event)"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
       </nav>
     <div class="main-content">
@@ -29,31 +31,31 @@
           </div>
 
           <div class="form-container">
-            <form action="http://127.0.0.1:8000/shipment/create_shipment" method="post">
+            <form id = "shipment-form">
               <div class="left">
                   <label for="shipment-number">shipment Number</label>
                   <input type="text" id="shipment-number" name="shipment_number" required > 
                   <label for="route-details">route Details</label>
                   <select name="route_details" id="route-details" required>
                     <option value="" disabled selected>Select Route</option>
-                    <option value="1">New York</option>
-                    <option value="2">Chennai</option>
-                    <option value="3">Bengaluru</option>
-                    <option value="4">London</option>
+                    <option value="New York">New York</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Bangalore">Bengaluru</option>
+                    <option value="London">London</option>
                   </select>
                   
                   <label for="device_data">Device Data</label>
                   <select name="device" id="device_data" required>
                     <option value="" disabled selected>Select Device</option>
-                    <option value="1">1150</option>
-                    <option value="1">1151</option>
-                    <option value="1">1152</option>
-                    <option value="1">1153</option>
-                    <option value="1">1154</option>
-                    <option value="1">1155</option>
-                    <option value="1">1156</option>
-                    <option value="1">1157</option>
-                    <option value="1">1158</option>
+                    <option value="1150">1150</option>
+                    <option value="1151">1151</option>
+                    <option value="1152">1152</option>
+                    <option value="1153">1153</option>
+                    <option value="1154">1154</option>
+                    <option value="1155">1155</option>
+                    <option value="1156">1156</option>
+                    <option value="1157">1157</option>
+                    <option value="1158">1158</option>
                   </select>
                   
                   <label for="PO-number">PO Number</label>
@@ -63,7 +65,7 @@
                   <input type="text" id="NDC-number" name="ndc_number" required>
 
                   <label for="serial_no_of_goods">Serial No of goods</label>
-                  <input type="text" id="serial_no_of_goods" name="serial_number_of_goods" required>
+                  <input type="text" id="serial_no_of_goods" name="serial_number" required>
                   
           
               </div>
@@ -75,14 +77,14 @@
                 <label for="Goods-type">Goods Type</label>
                 <select name="goods_type" id="Goods-type" required> 
                   <option value="" disabled selected>Select Goods Type</option>
-                  <option value="1">Electronics</option>
-                  <option value="2">Food Items</option>
-                  <option value="3">Furniture</option>
-                  <option value="4">Clothes</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Food Items">Food Items</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Clothes">Clothes</option>
                 </select>
                 
                 <label for="Expected-date">Expected Delivery Date</label>
-                <input type="date" id="Expected-date" name="expected_delivery_date" required>  
+                <input type="date" id="Expected-date" name="delivery_date" required>  
                 
                 <label for="Delivery-number">Delivery Number</label>
                 <input type="text" id="Delivery-number" name="delivery_number" required>
@@ -91,7 +93,7 @@
                 <input type="text" id="Batch-id" name="batch_id" required> 
 
                 <label for="shipment-description">Shipment Description</label>
-                <input type="text" id="shipment-description" name="shipment_description" required>
+                <input type="text" id="shipment-description" name="description" required>
      
               </div>
               <input type="hidden" id="created_by" name="created_by">
@@ -104,24 +106,63 @@
       
   </div>
   
-<script>
- // JavaScript to set the hidden field value from cookies
-    document.addEventListener('DOMContentLoaded', function() {
-    const email = getCookie('user_email'); // Function to get cookie value
-    document.getElementById('created_by').value = email;
- 
-     });
-  
-   function getCookie(name) {
-      let cookieArr = document.cookie.split(";");
-      for(let i = 0; i < cookieArr.length; i++) {
-        let cookiePair = cookieArr[i].split("=");
-      if(name == cookiePair[0].trim()) {
-        return decodeURIComponent(cookiePair[1]);
-    }
-    }
-     return null;
-   }
+  <script>      
+      
+      async function logout() {
+          try {
+            // Clear client-side storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Call backend logout
+            await fetch('/auth/logout', {
+              method: 'GET',
+              credentials: 'include' // Important for cookie clearing
+            });
+            
+            // Redirect to login page
+            window.location.href = '/frontend/index.html';
+          } catch (error) {
+            console.error('Logout failed:', error);
+            window.location.href = '/frontend/index.html';
+          }
+        }
+              
+      function getToken() {
+        return localStorage.getItem("access_token"); // Assuming you store the token in localStorage
+      }
+      document.addEventListener("DOMContentLoaded", function() {
+        const role = localStorage.getItem("user_role"); // Assuming you store the user role in localStorage
+        if (role === "admin") {
+          const adminToolsItem = document.getElementById("admin-tools-item");
+          if (adminToolsItem) {
+            adminToolsItem.style.display = "block"; // Show the admin tools item
+          }
+        }
+      });
+
+    document.getElementById("shipment-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch("http://127.0.0.1/shipment/create_shipment", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Shipment created successfully!");
+        window.location.href = "/frontend/new_shipment.html";
+      } else {
+        alert(data.detail || "Failed to create shipment.");
+      }
+    });
   </script>
   
 </body>

@@ -217,3 +217,50 @@ label{
 
 
 
+
+
+/* Alert System */
+.alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  transform: translateX(150%);
+  transition: transform 0.3s ease-out;
+}
+
+.alert.show {
+  transform: translateX(0);
+}
+
+.alert-success {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.alert-error {
+  background-color: #f44336;
+  color: white;
+}
+
+.alert-warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+.alert-info {
+  background-color: #2196F3;
+  color: white;
+}
+
+.alert-close {
+  margin-left: 15px;
+  cursor: pointer;
+  font-weight: bold;
+}

@@ -5,12 +5,14 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="stylesheet" href="alerts.css">
+    <script src="/js/alerts.js"></script>
 </head>
 
 <body>
     <div class="container" id="container">
     <div class="form-container sign-in-container">
-        <form action="http://127.0.0.1:8000/auth/login" method="post" onsubmit="return validateRecaptcha()">
+        <form onsubmit="return handleLogin(event)">
             <h1>Sign In</h1>
     
         <span>or use your account</span>
@@ -45,16 +47,50 @@
 </div>
 
 
-<script>
-    function validateRecaptcha() {
-        var response = grecaptcha.getResponse();
-        if (response.length === 0) {
-            alert("Please complete the reCAPTCHA.");
-            return false;
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+
+            // Get form data
+            const email = form.email.value;
+            const password = form.password.value;
+            const recaptcha = grecaptcha.getResponse();
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        username: email,  // Note: FastAPI OAuth2 expects 'username' not 'email'
+                        password: password,
+                        recaptcha_token: recaptcha
+                    })
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.detail || "Login failed");
+                }
+
+                const data = await res.json();
+                
+                // Store tokens and user data
+                localStorage.setItem("access_token", data.access_token);
+                localStorage.setItem("user_name", data.user.name);
+                localStorage.setItem("user_email", data.user.email);
+                localStorage.setItem("user_role", data.user.role);
+                
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                alert(error.message || "Login failed. Please try again.");
+                grecaptcha.reset();
             }
-        return true;
+            return false;
         }
-     </script>
-    
+    </script>
+
 </body>
 </html>

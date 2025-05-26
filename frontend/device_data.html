@@ -228,55 +228,70 @@
   </style>
 
   <script>
+      function getToken() {
+        return localStorage.getItem("access_token"); 
+      }
+      document.addEventListener("DOMContentLoaded", function() {
+        const role = localStorage.getItem("user_role"); 
+        if (role === "admin") {
+          const adminToolsItem = document.getElementById("admin-tools-item");
+          if (adminToolsItem) {
+            adminToolsItem.style.display = "block";
+          }
+        }
+      });
     let allDeviceData = [];
 
-    function getTokenPayload() {
-      try {
-        const token = document.cookie.split('; ').find(row => row.startsWith('token=')).split('=')[1];
-        return JSON.parse(atob(token.split('.')[1]));
-      } catch {
-        return null;
-      }
-    }
-
-    function checkAccess() {
-      const payload = getTokenPayload();
-      if (!payload) {
-        alert('Invalid or missing token. Please log in.');
-        window.location.href = '/frontend/index.html';
-        return;
-      }
-      if (payload.role !== 'admin') {
-        alert('Access denied. Admins only.');
-        window.location.href = '/frontend/dashboard.html';
-      }
-    }
-
-    function checkTokenExpiry() {
-      const payload = getTokenPayload();
-      if (!payload) {
-        alert('Session expired or invalid. Please log in again.');
-        window.location.href = '/frontend/index.html';
-        return;
-      }
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (currentTime >= payload.exp) {
-        alert('Session expired. Please log in again.');
-        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.href = '/frontend/index.html';
-      }
-    }
-
     async function loadDeviceData() {
+     const token = localStorage.getItem('access_token');
+     if (!token){
+        alert('Session expired or unauthorized. Please log in.');
+        window.location.href = '/frontend/index.html';
+        return;
+     }
+
       try {
-        const response = await fetch('/device_data');
-        if (!response.ok) throw new Error('Failed to fetch device data');
+        const response = await fetch('/device/data', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.status === 401) {
+          localStorage.clear();
+          alert('Session expired or unauthorized. Please log in.');
+          window.location.href = '/frontend/index.html';
+          return;
+        }
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || 'Failed to load device data');
+        }
+
         const result = await response.json();
-        allDeviceData = result.device_data || [];
+        allDeviceData = result.data || [];
         renderTable();
       } catch (error) {
         console.error('Error loading device data:', error);
+        showErrorToast('Failed to load device data. Please try again later.');
       }
+    }
+    function showErrorToast(message){
+      const toast = document.createElement('div');
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.right = '20px';
+      toast.style.padding = '15px';
+      toast.style.backgroundColor = '#ff4b2b';
+      toast.style.color = 'white';
+      toast.style.borderRadius = '5px';
+      toast.style.zIndex = '1000';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(()=>{
+        document.body.removeChild(toast);
+      }, 5000);
+
     }
 
     function renderTable() {
@@ -284,16 +299,16 @@
       const deviceId = document.getElementById('deviceIdSelect').value;
       const limit = parseInt(document.getElementById('limitSelect').value, 10);
 
-      // Filter by Device ID if not "all"
-      let filteredData = allDeviceData;
+      const normalizedData = allDeviceData.map(item => ({...item,sensor_id: item.sensor_id || item.Device_ID}));
+      // Filter by Device ID
+      let filteredData = normalizedData;
       if (deviceId !== "all") {
         filteredData = filteredData.filter(item => String(item.sensor_id) === deviceId);
       }
 
-      // Limit data
       const limitedData = filteredData.slice(0, limit);
 
-      // Render rows
+      // Render table rows
       tbody.innerHTML = '';
       limitedData.forEach(item => {
         const tr = document.createElement("tr");
@@ -309,24 +324,30 @@
       });
     }
 
-    function logout(event) {
-      if (event) event.preventDefault();
-      fetch('http://127.0.0.1:8000/auth/logout', {
-        method: 'GET',
-        credentials: 'same-origin'
-      }).then(response => {
-        if (response.redirected) {
-          window.location.href = response.url;
+      async function logout() {
+          try {
+            // Clear client-side storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Call backend logout
+            await fetch('/auth/logout', {
+              method: 'GET',
+              credentials: 'include' // Important for cookie clearing
+            });
+            
+            // Redirect to login page
+            window.location.href = '/frontend/index.html';
+          } catch (error) {
+            console.error('Logout failed:', error);
+            window.location.href = '/frontend/index.html';
+          }
         }
-      });
-    }
+ 
 
     window.onload = function () {
-      checkAccess();
-      checkTokenExpiry();
-      setInterval(checkTokenExpiry, 60000);  // every minute
       loadDeviceData();
-      setInterval(loadDeviceData, 10000);    // every 10 seconds
+      setInterval(loadDeviceData, 10000);  // Refresh every 10 seconds
 
       document.getElementById('deviceIdSelect').addEventListener('change', renderTable);
       document.getElementById('limitSelect').addEventListener('change', renderTable);
@@ -343,6 +364,8 @@
         <li><a href="shipment.html"><i class="fas fa-box-open"></i> <span> My Shipment</span></a></li>
         <li><a href="new_shipment.html"><i class="fas fa-plus-square"></i> <span> New Shipment</span></a></li>
         <li class="active"><a href="device_data.html"><i class="fas fa-microchip"></i> <span> Device Data</span></a></li>
+        <li id="admin-tools-item" style="display: none;"><a href="admin_tools.html"><i class="fas fa-tools"></i> <span> Admin Tools</span></a></li>
+
       </ul>
       <ul class="nav-bottom">
         <li class="logout"><a href="index.html" onclick="logout(event)"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
